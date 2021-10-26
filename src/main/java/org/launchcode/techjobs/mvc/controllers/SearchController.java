@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
-import java.util.Locale;
 
 import static org.launchcode.techjobs.mvc.controllers.ListController.columnChoices;
 
@@ -29,20 +28,25 @@ public class SearchController {
     }
 
     // TODO #3 - Create a handler to process a search request and render the updated search view.
-    @PostMapping(value = "results")
-    public String displaySearchResults(Model model, @RequestParam String searchType, @RequestParam String searchTerm)
-    {
-        ArrayList<Job>jobs;
-        if(searchTerm.toLowerCase().equals("all")||searchTerm.equals(""))
-        {
-            jobs= JobData.findAll();
+
+    @PostMapping("results")
+    public String displaySearchResults(Model model, @RequestParam String searchType, @RequestParam String searchTerm) {
+        ArrayList<Job> jobs;
+        if(searchType.equals("all") || searchTerm.equals("") || searchTerm.equalsIgnoreCase("all")) {
+            jobs = JobData.findAll();
+            model.addAttribute("title", "All Jobs");
         }
-        else{
-            jobs=JobData.findByColumnAndValue(searchType,searchTerm);
+        if (searchType.equals("all") && searchTerm.equalsIgnoreCase("")) {
+            jobs = JobData.findByColumnAndValue(searchType, searchTerm);
+            model.addAttribute("title", "Jobs with " + columnChoices.get(searchType) + ": " + searchTerm);
+
+        } else {
+            jobs = JobData.findByColumnAndValue(searchType, searchTerm);
+            model.addAttribute("title", "Jobs with " + columnChoices.get(searchType) + ": " + searchTerm);
         }
-        model.addAttribute("columns", ListController.columnChoices);
-        model.addAttribute("title","jobs with"+ columnChoices.get(searchType)+":"+searchTerm);
-        model.addAttribute("jobs",jobs);
+        model.addAttribute("jobs", jobs);
+        model.addAttribute("columns", columnChoices);
         return "search";
     }
+
 }
